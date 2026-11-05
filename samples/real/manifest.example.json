@@ -1,0 +1,24 @@
+{
+  "note": "Example structure only. Real entries go in manifest.json (git-ignored).",
+  "material_code": "REAL-DEMO-001 (fictional internal code)",
+  "product_name": "<as printed on the SDS>",
+  "supplier": "<as printed on the SDS>",
+  "documents": [
+    {
+      "role": "older revision (intended baseline)",
+      "local_file": "samples/real/<older>.pdf",
+      "source_url": "<URL>",
+      "retrieved_on": "YYYY-MM-DD",
+      "retrieved_by": "<name>",
+      "sha256": "<sha256>"
+    },
+    {
+      "role": "newer revision",
+      "local_file": "samples/real/<newer>.pdf",
+      "source_url": "<URL>",
+      "retrieved_on": "YYYY-MM-DD",
+      "retrieved_by": "<name>",
+      "sha256": "<sha256>"
+    }
+  ]
+}
