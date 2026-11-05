@@ -318,3 +318,46 @@ def test_identifier_list_matches_register_identifier(env):
     cands = wf.suggest_candidates(env.conn, doc)
     assert cands[0]["material_id"] == mid
     assert "product identifier matches" in cands[0]["reasons"]
+
+
+def _draft_body(env, rid):
+    did = wf.generate_draft(env.conn, rid, "tester")
+    return env.conn.execute("SELECT body FROM notification_drafts WHERE id=?",
+                            (did,)).fetchone()["body"]
+
+
+def test_draft_wording_when_no_extraction_warnings(env):
+    mid = env.material()
+    env.baseline(mid)
+    rid = env.receive(env.pdf("v2.pdf", date_line="Revision date: 2025-06-15", body=REVISED))
+    r = confirm(env, rid, mid)
+    doc = wf.doc_dict(wf.get_document(env.conn, r["document_id"]))
+    assert doc["warnings"] == []
+    body = _draft_body(env, rid)
+    assert ("No additional extraction warnings recorded. See the classification reason "
+            "above for any identity, date, language, or jurisdiction limitations.") in body
+    assert "none recorded" not in body
+    # Classification limitations stay in the draft.
+    assert "Limitations:" in r["classification_reason"]
+    assert r["classification_reason"] in body
+    assert "not verified" in body
+    # Scope, OCR, review and draft-only statements preserved.
+    for needle in ("Sections outside 2, 3, 8, 14 and 15 are not compared",
+                   "No OCR", "Request: please review", "Not sent.",
+                   "makes no determination about hazard severity"):
+        assert needle in body
+
+
+def test_draft_keeps_actual_extraction_warnings(env):
+    mid = env.material()
+    env.baseline(mid)
+    rid = env.receive(env.pdf("no14.pdf", date_line="Revision date: 2025-06-15",
+                              omit_sections=(14,)))
+    r = confirm(env, rid, mid)
+    doc = wf.doc_dict(wf.get_document(env.conn, r["document_id"]))
+    assert doc["warnings"]
+    body = _draft_body(env, rid)
+    for w in doc["warnings"]:
+        assert f"  - {w}" in body
+    assert "No additional extraction warnings recorded" not in body
+    assert r["classification_reason"] in body

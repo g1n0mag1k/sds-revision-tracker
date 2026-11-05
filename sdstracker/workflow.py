@@ -43,6 +43,9 @@ NO_REGISTER_MATCH = "no_register_match"
 
 REVIEW_STATUSES = ("pending", "in_progress", "completed")
 RECIPIENT_LABEL = "Regulatory support — demonstration recipient"
+NO_EXTRA_WARNINGS_TEXT = (
+    "  - No additional extraction warnings recorded. See the classification reason "
+    "above for any identity, date, language, or jurisdiction limitations.")
 
 
 class WorkflowError(Exception):
@@ -610,7 +613,7 @@ def render_draft(conn, r):
         lines.append("Supported-section comparison: not performed (no baseline used).")
     warnings = inc["warnings"]
     lines += ["", "Extraction/comparison limitations:"]
-    lines += [f"  - {w}" for w in warnings] or ["  - none recorded"]
+    lines += [f"  - {w}" for w in warnings] or [NO_EXTRA_WARNINGS_TEXT]
     lines += ["  - Text comparison only. Sections outside 2, 3, 8, 14 and 15 are not compared.",
               "  - No OCR; image-only content is not read.",
               "  - This draft makes no determination about hazard severity, regulatory "
