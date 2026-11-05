@@ -94,13 +94,13 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def connect(data_dir: Path | None = None) -> sqlite3.Connection:
+def connect(data_dir: Path | None = None, check_same_thread: bool = True) -> sqlite3.Connection:
     path = config.db_path(data_dir)
     if not path.exists():
         raise FileNotFoundError(
             f"Database not found at {path}. Run: .venv/bin/python -m sdstracker init-db"
         )
-    conn = sqlite3.connect(path)
+    conn = sqlite3.connect(path, check_same_thread=check_same_thread)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
