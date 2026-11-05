@@ -162,9 +162,11 @@ not real-document results. See [docs/results-and-limitations.md](docs/results-an
 ## Status
 
 In development. Built as a demonstration project and not in production use.
-One genuine supplier SDS (Fisher Scientific, Acetone) has been used as a
-parser test. Revision-pair validation on a genuine old/new pair is **not yet
-run**. See the results report.
+One real supplier SDS tested; checked metadata and supported-section
+boundaries verified on that document after targeted fixes. This is not a
+claim of general extraction accuracy. Revision-pair validation on a genuine
+old/new pair is **not yet run**. See the results report and
+[docs/real-sds-provenance.json](docs/real-sds-provenance.json).
 
 ## License
 

@@ -16,8 +16,10 @@ products as a revision pair.
 
 ## Provenance
 
-For each file, copy `manifest.example.json` to `manifest.json` (also ignored,
-because it describes local files) and record:
+Shareable provenance for documents actually used is committed in
+`docs/real-sds-provenance.json`, with no local absolute paths or credentials.
+For local working notes, you can copy `manifest.example.json` to
+`manifest.json` (ignored) and record:
 
 - source URL (supplier page or archive capture URL)
 - retrieval date

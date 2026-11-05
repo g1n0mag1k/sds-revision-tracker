@@ -4,14 +4,22 @@
 
 ### 1a. Revision-pair validation — NOT YET RUN
 
-No genuine old/new SDS pair has been tested. This acceptance criterion stays
+No genuine old/new SDS pair has been tested. On 2026-11-05 a single
+web.archive.org lookup for the exact Fisher SDS URL failed with an access
+problem: the connection was reset before any response, on 4 attempts. No
+capture list was obtained, so it is unknown whether an earlier revision is
+archived. This acceptance criterion stays
 **not yet run** until two genuine revisions of the same product from the same
 supplier, in the same edition, have gone through the workflow.
 
 ### 1b. Single real document — parser validation (run 2026-11-05)
 
-This is a parser test on one genuine public SDS. It is **not** a masterbatch or
-raw-material demonstration, and not a revision comparison.
+**One real supplier SDS tested; checked metadata and supported-section
+boundaries verified on that document after targeted fixes.** This is not a
+measure of general extraction accuracy. It is a parser test on one genuine
+public SDS, **not** a masterbatch or raw-material demonstration, and not a
+revision comparison. Shareable provenance:
+[real-sds-provenance.json](real-sds-provenance.json).
 
 **Document:**
 
@@ -22,7 +30,7 @@ raw-material demonstration, and not a revision comparison.
 | Source | `https://www.fishersci.com/store/msds?partNumber=A184&...` (supplier's own SDS link, found through its SDS search for "A18-4"). HTTP 200, `application/pdf`, no redirect. |
 | Retrieved | 2026-11-05 |
 | SHA-256 | `08b3b20730e03106b7867f2376c5bfbee388bcecccb19d61468b70289f1e59bb` |
-| Storage | `samples/real/` (git-ignored); provenance in the git-ignored `samples/real/manifest.json` |
+| Storage | PDF in `samples/real/` (git-ignored); provenance committed in `docs/real-sds-provenance.json` |
 | Validation | The file opens in pdfplumber, and the text identifies the product, supplier and edition. The `%PDF-` signature check was not relied on alone. |
 
 **Fields:** extractor output compared by hand with the PDF text. The
