@@ -1,0 +1,3 @@
+# Runtime dependencies (pinned). Install via scripts/bootstrap.sh.
+streamlit==1.39.0
+pdfplumber==0.11.4

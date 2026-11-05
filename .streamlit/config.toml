@@ -1,0 +1,11 @@
+[browser]
+# No telemetry.
+gatherUsageStats = false
+
+[server]
+# Documented upload limit (MB). The app also enforces this itself.
+maxUploadSize = 20
+headless = true
+
+[client]
+toolbarMode = "minimal"
