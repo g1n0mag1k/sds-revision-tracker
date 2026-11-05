@@ -29,7 +29,7 @@
   "archive_search": {
     "date": "2026-11-05",
     "scope": "One Wayback CDX query for the exact source_url above",
-    "outcome": "Access problem: the agent proxy opened the tunnel to web.archive.org, but the onward connection was closed before any HTTP response (connection reset; proxy reason 'ws_closed_mid_exchange'), on 4 attempts. No capture list was obtained; it is unknown whether an earlier revision is archived.",
+    "outcome": "Access problem: the agent proxy opened the tunnel to web.archive.org, but the onward connection was closed before any HTTP response (connection reset; proxy reason 'ws_closed_mid_exchange'), on 4 attempts, plus 1 further attempt after the allowed-domain settings were saved again. Unresolved. No capture list was obtained; it is unknown whether an earlier revision is archived.",
     "revision_pair_validation": "not yet run"
   }
 }

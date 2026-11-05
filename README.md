@@ -136,6 +136,19 @@ Other explicit commands:
 .venv/bin/python -m sdstracker receive path/to/file.pdf --actor "Your name" --source-url URL --retrieved-on 2026-11-05
 ```
 
+Run all commands from the repository root, so that `.streamlit/config.toml`
+is picked up. Data is stored in `data/` by default. To keep a separate
+database, for example for real documents, set `SDSTRACKER_DATA_DIR` on every
+command, including `streamlit run`:
+
+```bash
+SDSTRACKER_DATA_DIR=data-real .venv/bin/python -m sdstracker init-db
+```
+
+```bash
+SDSTRACKER_DATA_DIR=data-real .venv/bin/streamlit run app.py
+```
+
 The upload limit is 20 MB per PDF (`.streamlit/config.toml` and
 `sdstracker/config.py`).
 

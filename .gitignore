@@ -4,6 +4,7 @@ venv/
 
 # Application data: databases, stored/uploaded PDFs, generated demo files
 data/
+data-*/
 *.db
 *.sqlite
 *.sqlite3

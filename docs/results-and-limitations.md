@@ -6,7 +6,10 @@
 
 No genuine old/new SDS pair has been tested. On 2026-11-05 a single
 web.archive.org lookup for the exact Fisher SDS URL failed with an access
-problem: the connection was reset before any response, on 4 attempts. No
+problem: the connection was reset before any response, on 4 attempts. One
+further attempt after the allowed-domain settings were saved again failed the
+same way. The archive check is recorded as unresolved, and no retries are
+scheduled. No
 capture list was obtained, so it is unknown whether an earlier revision is
 archived. This acceptance criterion stays
 **not yet run** until two genuine revisions of the same product from the same
@@ -157,7 +160,8 @@ There were no page errors.
     left out too.
   - A running header is recognized only if it repeats on at least half the
     pages (minimum two). A header that appears once, such as in a two-page
-    SDS with no header on page 1, stays in the section text.
+    SDS with no header on page 1, stays in the section text. A test pins this
+    current behavior: `test_known_limitation_single_occurrence_header_stays_in_section_text`.
   - A product identifier can be a whole catalog-number list (as in the Fisher
     SDS). Matching checks whether any listed number equals the register's
     identifier.

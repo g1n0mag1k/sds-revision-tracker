@@ -102,3 +102,20 @@ def test_cat_no_without_value_stays_missing():
     f = extract_from_pages(["1. Identification\nProduct Name X\nCompany\n\n"
                             "2. Hazard(s) identification\n" + "text " * 20])["fields"]
     assert f["product_identifier"]["status"] == MISSING
+
+
+def test_known_limitation_single_occurrence_header_stays_in_section_text():
+    """KNOWN LIMITATION (documents current behavior, not desired behavior).
+
+    A running header that appears on only one page is not recognized as a
+    header (repetition on at least two pages is required), so it remains in
+    the section text and would appear in a comparison. If this behavior is
+    improved, update this test and docs/results-and-limitations.md.
+    """
+    page1 = ("1. Identification\nProduct Name Acetone\n"
+             "3. Composition/information on Ingredients\nComponent CAS No Weight %")
+    page2 = ("Acetone Revision Date 18-Dec-2025\n"
+             "Acetone 67-64-1 >95\n"
+             "8. Exposure controls / personal protection\nExposure Guidelines")
+    s3 = extract_from_pages([page1, page2])["sections"][3]["text"]
+    assert "Acetone Revision Date 18-Dec-2025" in s3
