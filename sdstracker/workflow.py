@@ -195,6 +195,15 @@ def _norm_id(s):
     return re.sub(r"[\s\-_./]", "", (s or "").lower())
 
 
+def _id_set(s):
+    """An extracted identifier may be a list (e.g. several catalog numbers)."""
+    return {_norm_id(x) for x in re.split(r"[;,]", s or "") if _norm_id(x)}
+
+
+def _ids_overlap(a, b):
+    return bool(_id_set(a) & _id_set(b))
+
+
 def _names_match(a, b):
     a, b = normalize_name(a), normalize_name(b)
     return bool(a and b) and (a == b or a in b or b in a)
@@ -215,7 +224,7 @@ def suggest_candidates(conn, document) -> list[dict]:
     out = []
     for m in conn.execute("SELECT * FROM materials ORDER BY code"):
         score, reasons = 0, []
-        if pid and m["product_identifier"] and _norm_id(pid) == _norm_id(m["product_identifier"]):
+        if pid and m["product_identifier"] and _ids_overlap(pid, m["product_identifier"]):
             score += 3
             reasons.append("product identifier matches")
         elif pid and m["product_identifier"]:
@@ -308,13 +317,13 @@ def _identity_checks(material, baseline, incoming):
         conflicts.append(f"incoming supplier '{sup['value']}' does not match register "
                          f"supplier '{material['supplier']}'")
     if pid["status"] == FOUND and material["product_identifier"] and \
-            _norm_id(pid["value"]) != _norm_id(material["product_identifier"]):
+            not _ids_overlap(pid["value"], material["product_identifier"]):
         conflicts.append(f"incoming product identifier '{pid['value']}' differs from "
                          f"register '{material['product_identifier']}'")
     if baseline is not None:
         bpid, bname = _field(baseline, "product_identifier"), _field(baseline, "product_name")
         if pid["status"] == FOUND and bpid["status"] == FOUND and \
-                _norm_id(pid["value"]) != _norm_id(bpid["value"]):
+                not _ids_overlap(pid["value"], bpid["value"]):
             conflicts.append(f"product identifier differs from baseline "
                              f"('{bpid['value']}' vs '{pid['value']}')")
         if name["status"] == FOUND and bname["status"] == FOUND and \

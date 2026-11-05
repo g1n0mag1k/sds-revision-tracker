@@ -162,7 +162,9 @@ not real-document results. See [docs/results-and-limitations.md](docs/results-an
 ## Status
 
 In development. Built as a demonstration project and not in production use.
-The real-document demonstration is **not yet run** (see the results report).
+One genuine supplier SDS (Fisher Scientific, Acetone) has been used as a
+parser test. Revision-pair validation on a genuine old/new pair is **not yet
+run**. See the results report.
 
 ## License
 

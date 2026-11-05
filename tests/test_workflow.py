@@ -308,3 +308,13 @@ def test_required_activity_events(env):
               "match_confirmed", "classification_recorded", "comparison_recorded",
               "draft_generated", "review_acknowledgment_completed", "baseline_designated"):
         assert a in actions, a
+
+
+def test_identifier_list_matches_register_identifier(env):
+    """A catalog-number list containing the register identifier is a candidate."""
+    mid = env.material(pid="SYN-1000")
+    rid = env.receive(env.pdf("list.pdf", product_id="SYN-0999; SYN-1000; SYN-1001"))
+    doc = wf.get_document(env.conn, env.receipt(rid)["document_id"])
+    cands = wf.suggest_candidates(env.conn, doc)
+    assert cands[0]["material_id"] == mid
+    assert "product identifier matches" in cands[0]["reasons"]

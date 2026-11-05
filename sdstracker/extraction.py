@@ -57,17 +57,29 @@ EXCLUDED_DATE_CONTEXT_RE = re.compile(
     r"print|supersed|previous|replaces|retriev|download|received|expir", re.I)
 
 VERSION_RE = re.compile(
-    r"\b(?:version|rev\.)\s*(?:no\.?|number|#)?\s*[:\-]?\s*(\d[\w.\-]*)", re.I)
+    r"\b(?:version|rev\.|revision\s+(?:number|no\.?|#))\s*(?:no\.?|number|#)?\s*[:\-]?\s*"
+    r"(\d[\w.\-]*)", re.I)
 
+# Label separators: a colon/dash, or (for labels at the start of a line) plain
+# whitespace, e.g. "Product Name Acetone".
+_SEP = r"(?:\s*[:\-]\s*|\s+)"
 PRODUCT_NAME_RE = re.compile(
-    r"^\s*(?:product\s+name|trade\s+name|name\s+of\s+product)\s*[:\-]\s*(.+)$", re.I)
+    r"^\s*(?:product\s+name|trade\s+name|name\s+of\s+product)" + _SEP + r"(.+)$", re.I)
 PRODUCT_ID_RE = re.compile(
-    r"^\s*(?:product\s+(?:number|code|no\.?)|catalog(?:ue)?\s+(?:number|no\.?)|"
+    r"^\s*(?:product\s+(?:number|code|no\.?)|cat(?:alog(?:ue)?)?\.?\s+(?:number|no\.?)|"
     r"item\s+(?:number|no\.?)|material\s+(?:number|no\.?)|article\s+(?:number|no\.?))"
     r"\s*[:\-]\s*(.+)$", re.I)
 SUPPLIER_RE = re.compile(
     r"^\s*(?:supplier|manufacturer(?:\s*/\s*supplier)?|company(?:\s+name)?|"
     r"details\s+of\s+the\s+supplier[^:]*)\s*[:\-]\s*(.*)$", re.I)
+# A bare label alone on its line, with the value on the next line
+# (e.g. "Company" followed by "Fisher Scientific Company").
+SUPPLIER_BARE_RE = re.compile(
+    r"^\s*(?:supplier|manufacturer|company|company\s+name)\s*$()", re.I)
+# Statements of the regulatory basis the SDS was prepared under.
+DECLARED_BASIS_RE = re.compile(
+    r"pursuant\s+to|prepared\s+(?:in\s+accordance\s+with|according\s+to)|"
+    r"in\s+accordance\s+with\s+the\s+requirements", re.I)
 
 CAS_RE = re.compile(r"\b(\d{2,7})-(\d{2})-(\d)\b")
 
@@ -257,13 +269,13 @@ def extract_from_pages(pages: list[str], result: dict | None = None) -> dict:
 
     f = {}
     f["product_name"] = _labeled_field(search, PRODUCT_NAME_RE, "product name")
-    f["product_identifier"] = _labeled_field(search, PRODUCT_ID_RE, "product identifier")
+    f["product_identifier"] = _labeled_field(search, PRODUCT_ID_RE, "product identifier",
+                                             continuation=True)
     f["supplier"] = _supplier_field(search)
     f["revision_date"] = _date_field(search)
     f["version"] = _version_field(search)
     f["language"] = _marker_field(result["full_text"], LANGUAGE_MARKERS, "language")
-    f["jurisdiction"] = _marker_field(result["full_text"], JURISDICTION_MARKERS,
-                                      "jurisdiction")
+    f["jurisdiction"] = _jurisdiction_field(page_lines, result["full_text"])
     f["cas_numbers"] = _cas_field(sections)
     result["fields"] = f
     for name in ("product_name", "supplier", "revision_date"):
@@ -330,25 +342,42 @@ def _value_after(search, idx, inline):
     return ""
 
 
-def _labeled_field(search, regex, label):
+def _evidence(line, value):
+    """Evidence text: the labeled line, plus the value when it came from a
+    following line."""
+    line = normalize_space(line)
+    value = normalize_space(value)
+    return line if value in line else f"{line} / {value}"
+
+
+def _labeled_field(search, regex, label, continuation=False):
     hits = []
     for i, (p, ln) in enumerate(search):
         m = regex.match(ln)
         if m:
             val = _value_after(search, i, m.group(1))
+            if continuation:
+                # A list ending in ';' or ',' continues on following lines
+                # on the same page (e.g. a list of catalog numbers).
+                j = i + 1
+                while val.rstrip().endswith((";", ",")) and j < len(search) \
+                        and search[j][0] == p:
+                    val = val.rstrip() + " " + search[j][1].strip()
+                    j += 1
+                val = val.rstrip(" ;,")
             if val:
-                hits.append({"page": p, "text": normalize_space(ln), "raw": val})
+                hits.append({"page": p, "text": _evidence(ln, val), "raw": val})
     return _resolve(hits, label, key=lambda h: normalize_space(h["raw"]).lower())
 
 
 def _supplier_field(search):
     hits = []
     for i, (p, ln) in enumerate(search):
-        m = SUPPLIER_RE.match(ln)
+        m = SUPPLIER_RE.match(ln) or SUPPLIER_BARE_RE.match(ln)
         if m:
             val = _value_after(search, i, m.group(1))
             if val:
-                hits.append({"page": p, "text": normalize_space(ln), "raw": val})
+                hits.append({"page": p, "text": _evidence(ln, val), "raw": val})
     return _resolve(hits, "supplier", key=lambda h: normalize_name(h["raw"]))
 
 
@@ -432,6 +461,29 @@ def _marker_field(full_text, markers, label):
     value = next(iter(found))
     return {"status": FOUND, "value": value, "evidence": ev,
             "note": f"inferred from text indicators only; not verified"}
+
+
+def _jurisdiction_field(page_lines, full_text):
+    """Prefer the document's own statement of the basis it was prepared under.
+
+    Many SDSs list other jurisdictions' inventories in Section 15, so keyword
+    indicators anywhere in the text are often mixed. A declared basis (e.g.
+    "created pursuant to the requirements of: US OSHA ...") is used when it names
+    exactly one jurisdiction; it is still reported as not verified.
+    """
+    for p, lines in enumerate(page_lines, 1):
+        for i, ln in enumerate(lines):
+            if DECLARED_BASIS_RE.search(ln):
+                stmt = normalize_space(" ".join(lines[i:i + 2]))
+                low = stmt.lower()
+                hits = [k for k, terms in JURISDICTION_MARKERS.items()
+                        if any(t in low for t in terms)]
+                if len(hits) == 1:
+                    return {"status": FOUND, "value": hits[0],
+                            "evidence": [{"page": p, "text": stmt, "raw": hits[0]}],
+                            "note": "from the document's stated preparation basis; "
+                                    "not verified"}
+    return _marker_field(full_text, JURISDICTION_MARKERS, "jurisdiction")
 
 
 def _cas_field(sections):
