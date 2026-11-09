@@ -183,4 +183,4 @@ old/new pair is **not yet run**. See the results report and
 
 ## License
 
-*(license not yet decided)*
+MIT — see [LICENSE](LICENSE).
