@@ -1,0 +1,35 @@
+{
+  "note": "Shareable provenance for real supplier SDS documents used in testing. The PDFs themselves are kept out of Git (samples/real/ is ignored). Internal material codes are fictional.",
+  "documents": [
+    {
+      "purpose": "Single-document parser test (not a revision pair; not a masterbatch raw-material demonstration)",
+      "fictional_material_code": "REAL-DEMO-001",
+      "product": "Acetone",
+      "supplier": "Fisher Scientific Company",
+      "catalog_number_used_for_lookup": "A18-4 (the SDS lists many catalog numbers including A18-4)",
+      "edition": "US OSHA Hazard Communication Standard 2024 (29 CFR 1910.1200), English",
+      "printed_revision_date": "18-Dec-2025",
+      "printed_revision_number": "9",
+      "printed_creation_date": "28-Apr-2009",
+      "pages": 10,
+      "source_url": "https://www.fishersci.com/store/msds?partNumber=A184&productDescription=acetone-certified-acs-l&vendorId=VN00033897&keyword=true&countryCode=US&language=en",
+      "found_via": "https://www.fishersci.com/us/en/catalog/search/sds?selectLang=EN&store=&msdsKeyword=A18-4",
+      "retrieved_on": "2026-11-05",
+      "http_response": "200, application/pdf, no redirect, 121965 bytes",
+      "sha256": "08b3b20730e03106b7867f2376c5bfbee388bcecccb19d61468b70289f1e59bb",
+      "result": "One real supplier SDS tested; checked metadata and supported-section boundaries verified on that document after targeted fixes. This is not a measure of general extraction accuracy.",
+      "observed_limitations": [
+        "First run: product name, supplier, product identifier and version were missing and jurisdiction was conflicting, because of label layouts (no colon, bare 'Company' label with the value on the next line, 'Cat No.' list, 'Revision Number'). Fixed with targeted rules and regression tests.",
+        "The product identifier is the whole catalog-number list printed on the SDS, not a single identifier.",
+        "Jurisdiction and language are text indicators only and are reported as not verified; Section 15 also mentions EU REACH inventory information.",
+        "Only one revision of this SDS was available, so no real revision comparison has been run."
+      ]
+    }
+  ],
+  "archive_search": {
+    "date": "2026-11-05",
+    "scope": "One Wayback CDX query for the exact source_url above",
+    "outcome": "Access problem: the agent proxy opened the tunnel to web.archive.org, but the onward connection was closed before any HTTP response (connection reset; proxy reason 'ws_closed_mid_exchange'), on 4 attempts, plus 1 further attempt after the allowed-domain settings were saved again. Unresolved. No capture list was obtained; it is unknown whether an earlier revision is archived.",
+    "revision_pair_validation": "not yet run"
+  }
+}

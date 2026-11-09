@@ -1,0 +1,27 @@
+# Virtual environments
+.venv/
+venv/
+
+# Application data: databases, stored/uploaded PDFs, generated demo files
+data/
+data-*/
+*.db
+*.sqlite
+*.sqlite3
+uploads/
+
+# Real supplier SDS PDFs are kept out of Git (see samples/real/README.md)
+samples/real/*
+!samples/real/README.md
+!samples/real/manifest.example.json
+
+# Caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cache/
+
+# Secrets
+.env
+.env.*
+.streamlit/secrets.toml
